@@ -5,6 +5,111 @@ SQL-based analysis of Target Brazil's e-commerce dataset to uncover customer beh
 
 This project analyzes Target Brazil's e-commerce dataset to understand customer behavior, sales performance, payment preferences, logistics efficiency, and regional business trends. The objective was to uncover actionable insights that support revenue growth, operational efficiency, and improved customer experience.
 
+**Analysis based on sales, freight and delivery time 
+**
+1. Find the no. of days taken to deliver each order from the order’s purchase date as 
+delivery time. 
+Also, calculate the difference (in days) between the estimated & actual delivery date of an 
+order. 
+Do this in a single query. 
+ 
+You can calculate the delivery time and the difference between the estimated & actual 
+delivery date using the given formula: 
+ time_to_deliver = order_delivered_customer_date - order_purchase_timestamp 
+ diff_estimated_delivery = order_delivered_customer_date - 
+order_estimated_delivery_date 
+ 
+SQL Query: 
+SELECT order_id, 
+    DATE_DIFF(DATE(order_delivered_customer_date), 
+        DATE(order_purchase_timestamp), 
+        DAY 
+    ) AS time_to_deliver, 
+    DATE_DIFF( 
+        DATE(order_delivered_customer_date), 
+        DATE(order_estimated_delivery_date), 
+        DAY 
+    ) AS diff_estimated_delivery 
+FROM `prasanna-kumars-project.Business_Case.orders` 
+WHERE order_delivered_customer_date IS NOT NULL; 
+Output: 
+ 
+Insight: 
+Comparing actual and estimated delivery dates provides valuable insights into delivery 
+efficiency, fulfilment accuracy, and overall customer service performance. 
+Actionable Recommendations: 
+ Reduce delivery delays by strengthening coordination and communication with 
+logistics partners.  
+ Identify and closely monitor regions with consistently longer delivery times to 
+address operational bottlenecks.  
+ Improve delivery forecasting and estimation processes to better align expected and 
+actual fulfilment timelines. 
+___________________________________________________________________________ 
+2. Find out the top 5 states with the highest & lowest average freight value. 
+SQL Query: 
+Top 5 Highest Average Freight Value 
+SELECT c.customer_state,  ROUND(AVG(oi.freight_value), 2) AS highest_avg_freight 
+FROM `prasanna-kumars-project.Business_Case.order_items` as oi 
+JOIN `prasanna-kumars-project.Business_Case.orders` as o 
+ON oi.order_id = o.order_id 
+JOIN `prasanna-kumars-project.Business_Case.customers` as c 
+ON o.customer_id = c.customer_id 
+GROUP BY c.customer_state 
+ORDER BY highest_avg_freight DESC 
+LIMIT 5 
+Output: 
+Top 5 Lowest Average Freight Value 
+SELECT c.customer_state,  ROUND(AVG(oi.freight_value), 2) AS lowest_avg_freight 
+FROM `prasanna-kumars-project.Business_Case.order_items` as oi 
+JOIN `prasanna-kumars-project.Business_Case.orders` as o 
+ON oi.order_id = o.order_id 
+JOIN `prasanna-kumars-project.Business_Case.customers` as c 
+ON o.customer_id = c.customer_id 
+GROUP BY c.customer_state 
+ORDER BY lowest_avg_freight ASC 
+LIMIT 5 
+Output: 
+Insight: 
+Freight costs differ significantly across states, reflecting variations in transportation distance, 
+logistics efficiency, and regional infrastructure. 
+Actionable Recommendations: 
+ Optimise delivery routes and warehouse locations in high-cost regions.  
+ Apply best logistics practices from low-cost states across the network.  
+___________________________________________________________________________ 
+3. Find out the top 5 states with the highest & lowest average delivery time. 
+SQL Query: 
+Top 5 States with Highest Average Delivery Time 
+SELECT 
+c.customer_state,ROUND(AVG(DATE_DIFF(DATE(o.order_delivered_customer_date),DATE(o.
+order_purchase_timestamp),DAY)),2) AS hightest_avg_delivery_days 
+FROM `prasanna-kumars-project.Business_Case.orders` as o 
+JOIN `prasanna-kumars-project.Business_Case.customers` as c 
+ON o.customer_id = c.customer_id 
+WHERE o.order_delivered_customer_date IS NOT NULL 
+GROUP BY c.customer_state 
+ORDER BY hightest_avg_delivery_days DESC 
+LIMIT 5 
+Output: 
+Top 5 States with Lowest Average Delivery Time 
+SELECT 
+customer_state,ROUND(AVG(DATE_DIFF(DATE(o.order_delivered_customer_date),DATE(o.or
+der_purchase_timestamp),DAY)),2) AS lowest_avg_delivery_days 
+FROM `prasanna-kumars-project.Business_Case.orders` as o 
+JOIN `prasanna-kumars-project.Business_Case.customers` as c 
+ON o.customer_id = c.customer_id 
+WHERE o.order_delivered_customer_date IS NOT NULL 
+GROUP BY c.customer_state 
+ORDER BY lowest_avg_delivery_days ASC 
+LIMIT 5 
+Output: 
+Insight: 
+Average delivery time differs across states, indicating variations in logistics and fulfilment 
+efficiency. 
+Actionable Recommendations: 
+ Investigate delays in states with longer delivery times.  
+ Improve collaboration with logistics partners.  
+___________________________________________________________________________ 
+
 ## Problem Statement
 
 How can Target Brazil leverage historical e-commerce transaction data to identify growth opportunities, optimize logistics operations, improve customer satisfaction, and support data-driven business decisions?
